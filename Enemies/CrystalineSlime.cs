@@ -1,8 +1,10 @@
 
 using Assets.Code.Interfaces;
 using Assets.Scripts;
+using System;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 public class CrystalineSlime : MonoBehaviour, IMob
 {
@@ -10,19 +12,21 @@ public class CrystalineSlime : MonoBehaviour, IMob
     [SerializeField] private EnemyHealthbarController _enemyHealthbarController;
     [SerializeField] private CrystalineSlimeSO _crystalineSlimeSO;
     [SerializeField] private CrystalinePathSO _crystalinePathSO;
-
+    [SerializeField] private VialaTiny _vialaOrb;
 
     private static Transform _playerTransform;
 
     private Animator _animator;
 
     public float HP { get; set; }
-    public Transform Transform { get { return gameObject.transform; } } 
+    public Transform Transform { get { return gameObject.transform; } }
 
+    public float MaxHP { get; set; }
 
     void Start()
     {
         this.HP = _crystalineSlimeSO.GetHP();
+        this.MaxHP = _crystalineSlimeSO.GetHP();
         _enemyHealthbarController.Sethealth(HP, HP);
         _playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         _animator = this.GetComponent<Animator>();
@@ -30,7 +34,10 @@ public class CrystalineSlime : MonoBehaviour, IMob
 
     void Update()
     {
-        Movement();
+        if(!(_animator.GetInteger("state") == 1 || _animator.GetInteger("state") == 0))
+        {
+            Movement();
+        }
 
         if (transform.position.x >= _playerTransform.position.x)
         {
@@ -63,7 +70,6 @@ public class CrystalineSlime : MonoBehaviour, IMob
 
     private void OnDeath()
     {
-        this.HP = _crystalineSlimeSO.GetHP();
         _enemyHealthbarController.Sethealth(HP, HP);
 
         if (transform.position.x >= _playerTransform.position.x)
@@ -74,6 +80,7 @@ public class CrystalineSlime : MonoBehaviour, IMob
         {
             _animator.SetInteger("state", 0);
         }
+        this.HP = MaxHP;
     }
 
     private void Movement()
@@ -94,6 +101,10 @@ public class CrystalineSlime : MonoBehaviour, IMob
         this.HP += hp;
     }
 
+    public void resetState()
+    {
+        _animator.SetInteger("state", 2);
+    }
     public void SpecialAction()
     {
         throw new System.NotImplementedException();
